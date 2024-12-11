@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 
@@ -34,7 +35,24 @@ class UserServiceTest {
         Assertions.assertTrue(result);
     }
 
+    @Test
+    void userRegister() {
+        String userAccount = "xjzai1";
+        String userPassword = " ";
+        String checkPassword = "ljx20041127";
+        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        Assertions.assertEquals(-1, result);
 
+        userAccount = "xj";
+        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        Assertions.assertEquals(-1, result);
 
+        userAccount = "xjz1";
+        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        Assertions.assertEquals(-1, result);
 
+        userAccount = "xjz ai1";
+        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        Assertions.assertEquals(-1, result);
+    }
 }

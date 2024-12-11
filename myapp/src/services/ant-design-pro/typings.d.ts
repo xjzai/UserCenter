@@ -2,25 +2,27 @@
 /* eslint-disable */
 
 declare namespace API {
+  /**
+   * 通用返回类
+   */
+  type BaseResponse<T> = {
+    code: number;
+    data: T;
+    message: string;
+    description: string;
+  };
+
   type CurrentUser = {
-    name?: string;
-    avatar?: string;
-    userid?: string;
-    email?: string;
-    signature?: string;
-    title?: string;
-    group?: string;
-    tags?: { key?: string; label?: string }[];
-    notifyCount?: number;
-    unreadCount?: number;
-    country?: string;
-    access?: string;
-    geographic?: {
-      province?: { label?: string; key?: string };
-      city?: { label?: string; key?: string };
-    };
-    address?: string;
+    id?: number;
+    username?: string;
+    userAccount?: string;
+    image?: string;
+    gender?: string;
     phone?: string;
+    email?: string;
+    status?: number;
+    userRole?: number;
+    CreateTime?: Date;
   };
 
   type LoginResult = {
@@ -28,6 +30,8 @@ declare namespace API {
     type?: string;
     currentAuthority?: string;
   };
+
+  type RegisterResult = number;
 
   type PageParams = {
     current?: number;
@@ -38,7 +42,7 @@ declare namespace API {
     key?: number;
     disabled?: boolean;
     href?: string;
-    avatar?: string;
+    image?: string;
     name?: string;
     owner?: string;
     desc?: string;
@@ -62,9 +66,16 @@ declare namespace API {
   };
 
   type LoginParams = {
-    username?: string;
-    password?: string;
+    userAccount?: string;
+    userPassword?: string;
     autoLogin?: boolean;
+    type?: string;
+  };
+
+  type RegisterParams = {
+    userAccount?: string;
+    userPassword?: string;
+    checkPassword?: string;
     type?: string;
   };
 
@@ -91,7 +102,7 @@ declare namespace API {
     extra?: string;
     key?: string;
     read?: boolean;
-    avatar?: string;
+    image?: string;
     title?: string;
     status?: string;
     datetime?: string;
