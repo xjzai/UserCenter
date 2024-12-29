@@ -1,7 +1,10 @@
 package com.xjzai1.usercenter_backend.service;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import com.xjzai1.usercenter_backend.pojo.User;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.annotation.MapperScan;
@@ -54,5 +57,13 @@ class UserServiceTest {
         userAccount = "xjz ai1";
         result = userService.userRegister(userAccount, userPassword, checkPassword);
         Assertions.assertEquals(-1, result);
+    }
+
+    @Test
+    void testSearchUserByTags() {
+        List<String> tags = Arrays.asList("java", "python");
+        List<User> users = userService.searchUserByTags(tags);
+        System.out.println(users.toString());
+        Assert.assertNotNull(users);
     }
 }

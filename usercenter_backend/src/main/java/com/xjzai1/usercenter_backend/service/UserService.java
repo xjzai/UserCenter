@@ -4,6 +4,7 @@ import com.xjzai1.usercenter_backend.pojo.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author Administrator
@@ -16,6 +17,8 @@ public interface UserService extends IService<User> {
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request);
     public int userLogout(HttpServletRequest request);
 
+
+    List<User> searchUserByTags(List<String> tags);
 
     User getSafetyUser(User originUser);
 }

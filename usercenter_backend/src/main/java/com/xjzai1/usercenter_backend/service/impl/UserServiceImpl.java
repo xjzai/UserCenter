@@ -2,6 +2,8 @@ package com.xjzai1.usercenter_backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.xjzai1.usercenter_backend.common.ErrorCode;
 import com.xjzai1.usercenter_backend.constant.userConstant;
 import com.xjzai1.usercenter_backend.exception.BuisnessException;
@@ -12,11 +14,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
 * @author Administrator
@@ -130,6 +136,43 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
+    public List<User> searchUserByTags(List<String> tags) {
+        if (CollectionUtils.isEmpty(tags)) {
+            throw new BuisnessException(ErrorCode.PARAMS_ERROR);
+        }
+        // sql查询
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+//        //拼接tag
+//        // like '%Java%' and like '%Python%'
+//        for (String tag : tags) {
+//            queryWrapper = queryWrapper.like("tags", tag);
+//        }
+//
+//        List<User> users = userMapper.selectList(queryWrapper);
+//        return users.stream().map(this::getSafetyUser).collect(Collectors.toList());
+
+        // 内存查询
+        QueryWrapper queryWrapper = new QueryWrapper<>();
+        List<User> userList = userMapper.selectList(queryWrapper);
+        Gson gson = new Gson();
+        //2.判断内存中是否包含要求的标签
+        return userList.stream().filter(user -> {
+            String tagstr = user.getTags();
+            if (StringUtils.isBlank(tagstr)){
+                return false;
+            }
+            Set<String> tempTagSet =  gson.fromJson(tagstr,new TypeToken<Set<String>>(){}.getType());
+            for (String tag : tags){
+                if (!tempTagSet.contains(tag)){
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
+
+    }
+
+    @Override
     public User getSafetyUser(User originUser) {
         if (originUser == null) {
             return null;
@@ -140,11 +183,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         saftyUser.setUserAccount(originUser.getUserAccount());
         saftyUser.setImage(originUser.getImage());
         saftyUser.setGender(originUser.getGender());
+        saftyUser.setProfile(originUser.getProfile());
         saftyUser.setPhone(originUser.getPhone());
         saftyUser.setEmail(originUser.getEmail());
         saftyUser.setStatus(originUser.getStatus());
         saftyUser.setCreateTime(originUser.getCreateTime());
         saftyUser.setUserRole(originUser.getUserRole());
+        saftyUser.setTags(originUser.getTags());
 
         return saftyUser;
     }

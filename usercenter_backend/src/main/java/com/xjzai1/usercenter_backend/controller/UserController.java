@@ -12,6 +12,7 @@ import com.xjzai1.usercenter_backend.pojo.User;
 import com.xjzai1.usercenter_backend.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = {"http://localhost:3000/"})
 public class UserController implements userConstant {
 
     @Autowired
@@ -104,6 +106,17 @@ public class UserController implements userConstant {
         }
         Integer data = userService.userLogout(request);
         return ResultUtils.success(data);
+    }
+
+    @GetMapping("/search/tags")
+    public BaseResponse<List<User>> searchTags(@RequestParam(required = false) List<String> tagList) {
+        // @RequestParam(required = false)这个表示参数可以不填，如果不写，参数为空时，前端会返回很多错误，
+        //  容易泄露信息，所以尽量后端处理为空的情况，返回我们想让前端看到的报错信息。
+        if (CollectionUtils.isEmpty(tagList)) {
+            throw new BuisnessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<User> userList = userService.searchUserByTags(tagList);
+        return ResultUtils.success(userList);
     }
 
 

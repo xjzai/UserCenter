@@ -45,6 +45,11 @@ public class User implements Serializable {
     private Integer gender;
 
     /**
+     * 个人简介
+     */
+    private String profile;
+
+    /**
      * 
      */
     private String userPassword;
@@ -84,6 +89,11 @@ public class User implements Serializable {
      * 0-普通用户 1-管理员
      */
     private Integer userRole;
+
+    /**
+     * 标签
+     */
+    private String tags;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
