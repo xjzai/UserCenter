@@ -50,6 +50,21 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--引入 redis，能够操作 redis-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>2.6.13</version>
+        </dependency>
+        <!--引入 spring-session 和 redis 的整合，使得自动将 session 存储到 redis 中：-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.session/spring-session-data-redis -->
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter -->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -122,7 +137,8 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.xjzai1.usercenter_backend.UsercenterBackendApplication</mainClass>
-                    <skip>true</skip>
+                    <!--打包时需要改成false,不然运行时会报没有主属性错误-->
+                    <skip>false</skip>
                 </configuration>
                 <executions>
                     <execution>

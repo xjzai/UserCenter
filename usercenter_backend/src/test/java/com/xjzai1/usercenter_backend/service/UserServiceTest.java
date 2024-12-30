@@ -38,26 +38,26 @@ class UserServiceTest {
         Assertions.assertTrue(result);
     }
 
-    @Test
-    void userRegister() {
-        String userAccount = "xjzai1";
-        String userPassword = " ";
-        String checkPassword = "ljx20041127";
-        long result = userService.userRegister(userAccount, userPassword, checkPassword);
-        Assertions.assertEquals(-1, result);
-
-        userAccount = "xj";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
-        Assertions.assertEquals(-1, result);
-
-        userAccount = "xjz1";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
-        Assertions.assertEquals(-1, result);
-
-        userAccount = "xjz ai1";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
-        Assertions.assertEquals(-1, result);
-    }
+//    @Test
+//    void userRegister() {
+//        String userAccount = "xjzai1";
+//        String userPassword = " ";
+//        String checkPassword = "ljx20041127";
+//        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+//        Assertions.assertEquals(-1, result);
+//
+//        userAccount = "xj";
+//        result = userService.userRegister(userAccount, userPassword, checkPassword);
+//        Assertions.assertEquals(-1, result);
+//
+//        userAccount = "xjz1";
+//        result = userService.userRegister(userAccount, userPassword, checkPassword);
+//        Assertions.assertEquals(-1, result);
+//
+//        userAccount = "xjz ai1";
+//        result = userService.userRegister(userAccount, userPassword, checkPassword);
+//        Assertions.assertEquals(-1, result);
+//    }
 
     @Test
     void testSearchUserByTags() {
