@@ -173,7 +173,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public int updateUser(User user, User loginUser) {
+    public User updateUser(User user, User loginUser) {
         int userId = user.getId();
         if (userId <= 0) {
             throw new BuisnessException(ErrorCode.PARAMS_ERROR);
@@ -185,7 +185,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (oldUser == null) {
             throw new BuisnessException(ErrorCode.NULL_ERROR);
         }
-        return userMapper.updateById(user);
+        userMapper.updateById(user);
+        return userMapper.selectById(userId);
     }
 
     @Override

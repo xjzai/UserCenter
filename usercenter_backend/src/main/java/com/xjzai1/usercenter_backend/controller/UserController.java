@@ -120,7 +120,7 @@ public class UserController implements userConstant {
     }
 
     @PostMapping("/update")
-    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request) {
+    public BaseResponse<User> updateUser(@RequestBody User user, HttpServletRequest request) {
         if (user == null) {
             throw new BuisnessException(ErrorCode.PARAMS_ERROR);
         }

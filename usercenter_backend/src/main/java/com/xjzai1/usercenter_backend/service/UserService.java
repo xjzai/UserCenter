@@ -48,10 +48,10 @@ public interface UserService extends IService<User> {
     /**
      * 更新用户信息
      * @param user
-     * @param request
+     * @param loginUser
      * @return
      */
-    int updateUser(User user, User loginUser);
+    User updateUser(User user, User loginUser);
 
     // 辅助函数
 
