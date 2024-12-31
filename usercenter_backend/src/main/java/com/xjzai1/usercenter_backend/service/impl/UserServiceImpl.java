@@ -173,6 +173,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
+    public int updateUser(User user, User loginUser) {
+        int userId = user.getId();
+        if (userId <= 0) {
+            throw new BuisnessException(ErrorCode.PARAMS_ERROR);
+        }
+        if (!isAdmin(loginUser) && userId != loginUser.getId()) {
+            throw new BuisnessException(ErrorCode.NO_AUTH);
+        }
+        User oldUser = userMapper.selectById(userId);
+        if (oldUser == null) {
+            throw new BuisnessException(ErrorCode.NULL_ERROR);
+        }
+        return userMapper.updateById(user);
+    }
+
+    @Override
     public User getSafetyUser(User originUser) {
         if (originUser == null) {
             return null;
@@ -192,6 +208,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         saftyUser.setTags(originUser.getTags());
 
         return saftyUser;
+    }
+
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (userObj == null) {
+            throw new BuisnessException(ErrorCode.NO_AUTH);
+        }
+        return (User) userObj;
+    }
+
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        if (user != null && user.getUserRole() == ADMIN_ROLE) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isAdmin(User user) {
+        if (user != null && user.getUserRole() == ADMIN_ROLE) {
+            return true;
+        }
+        return false;
     }
 
 }

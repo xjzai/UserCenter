@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:3000/"})
+@CrossOrigin(origins = {"http://localhost:3000/"},allowCredentials = "true")
 public class UserController implements userConstant {
 
     @Autowired
@@ -37,7 +37,7 @@ public class UserController implements userConstant {
         String checkPassword = userRegisterRequest.getCheckPassword();
 
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            throw new BuisnessException(ErrorCode.NULL_REEOR);
+            throw new BuisnessException(ErrorCode.NULL_ERROR);
         }
         Long data = userService.userRegister(userAccount, userPassword, checkPassword);
         return ResultUtils.success(data);
@@ -51,7 +51,7 @@ public class UserController implements userConstant {
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            throw new BuisnessException(ErrorCode.NULL_REEOR);
+            throw new BuisnessException(ErrorCode.NULL_ERROR);
         }
         User data = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(data);
@@ -59,7 +59,7 @@ public class UserController implements userConstant {
     
     @GetMapping("/search")
     public BaseResponse<List<User>> searchUser(String username, HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!userService.isAdmin(request)) {
             throw new BuisnessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -74,7 +74,7 @@ public class UserController implements userConstant {
 
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody Integer userId, HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!userService.isAdmin(request)) {
             throw new BuisnessException(ErrorCode.NO_AUTH);
         }
         if (userId <= 0) {
@@ -119,15 +119,20 @@ public class UserController implements userConstant {
         return ResultUtils.success(userList);
     }
 
-
-
-
-    private boolean isAdmin(HttpServletRequest request) {
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) userObj;
-        if (user != null && user.getUserRole() == ADMIN_ROLE) {
-            return true;
+    @PostMapping("/update")
+    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request) {
+        if (user == null) {
+            throw new BuisnessException(ErrorCode.PARAMS_ERROR);
         }
-        return false;
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BuisnessException(ErrorCode.NO_LOGIN);
+        }
+        return ResultUtils.success(userService.updateUser(user, loginUser));
     }
+
+
+
+
+
 }
