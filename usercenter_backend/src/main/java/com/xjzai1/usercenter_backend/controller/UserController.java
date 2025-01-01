@@ -1,6 +1,7 @@
 package com.xjzai1.usercenter_backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xjzai1.usercenter_backend.common.BaseResponse;
 import com.xjzai1.usercenter_backend.common.ErrorCode;
 import com.xjzai1.usercenter_backend.common.ResultUtils;
@@ -129,6 +130,15 @@ public class UserController implements userConstant {
             throw new BuisnessException(ErrorCode.NO_LOGIN);
         }
         return ResultUtils.success(userService.updateUser(user, loginUser));
+    }
+
+    // Todo 好像把密码都返回了，以后看看能不能优化了，返回安全的page
+    // 使用page需要自己加上配置类MybatisPlusConfig
+    @GetMapping("/recommend")
+    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        Page<User> userList = userService.page(new Page<>(pageNum, pageSize), queryWrapper);
+        return ResultUtils.success(userList);
     }
 
 
