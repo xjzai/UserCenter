@@ -136,8 +136,7 @@ public class UserController implements userConstant {
     // 使用page需要自己加上配置类MybatisPlusConfig
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        Page<User> userList = userService.page(new Page<>(pageNum, pageSize), queryWrapper);
+        Page<User> userList = userService.getRecommendUser(pageSize, pageNum, request);
         return ResultUtils.success(userList);
     }
 

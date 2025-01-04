@@ -1,10 +1,12 @@
 package com.xjzai1.usercenter_backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.xjzai1.usercenter_backend.common.ErrorCode;
+import com.xjzai1.usercenter_backend.config.RedisTemplateConfig;
 import com.xjzai1.usercenter_backend.constant.userConstant;
 import com.xjzai1.usercenter_backend.exception.BuisnessException;
 import com.xjzai1.usercenter_backend.pojo.User;
@@ -13,13 +15,17 @@ import com.xjzai1.usercenter_backend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,6 +42,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Autowired
     private UserMapper userMapper;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 盐值 混淆密码
@@ -221,6 +230,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BuisnessException(ErrorCode.NO_AUTH);
         }
         return (User) userObj;
+    }
+
+    @Override
+    public Page<User> getRecommendUser(long pageSize, long pageNum, HttpServletRequest request) {
+        User loginUser = getLoginUser(request);
+        String redisKey = String.format("xjzai1:user:recommend:%s",loginUser.getId());
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        // 如果有缓存，直接返回缓存
+        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
+        if (userPage != null) {
+            return userPage;
+        }
+        // 如果没有，先查询数据库，再存入缓存
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        userPage = userMapper.selectPage(new Page<>(pageNum,pageSize),queryWrapper);
+        try {
+            valueOperations.set(redisKey,userPage,30000, TimeUnit.MILLISECONDS);
+        } catch (Exception e){
+            log.error("redis set key error",e);
+        }
+        return userPage;
     }
 
     @Override

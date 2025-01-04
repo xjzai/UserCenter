@@ -1,5 +1,6 @@
 package com.xjzai1.usercenter_backend.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xjzai1.usercenter_backend.pojo.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -68,6 +69,15 @@ public interface UserService extends IService<User> {
      * @return
      */
     User getLoginUser(HttpServletRequest request);
+
+    /**
+     * 推荐用户列表
+     * @param pageSize
+     * @param pageNum
+     * @param request
+     * @return
+     */
+    Page<User> getRecommendUser(long pageSize, long pageNum, HttpServletRequest request);
 
     /**
      * 是否为管理员
