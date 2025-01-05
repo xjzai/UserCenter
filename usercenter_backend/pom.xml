@@ -57,6 +57,15 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
             <version>2.6.13</version>
         </dependency>
+        <!--引入 redisson，一个 java 操作 Redis 的客户端, 提供了大量的分布式数据集来简化对 Redis 的操作和使用-->
+        <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-data-26 -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-data-26</artifactId>
+            <version>3.17.0</version>
+        </dependency>
+
+
         <!--引入 spring-session 和 redis 的整合，使得自动将 session 存储到 redis 中：-->
         <!-- https://mvnrepository.com/artifact/org.springframework.session/spring-session-data-redis -->
         <dependency>
