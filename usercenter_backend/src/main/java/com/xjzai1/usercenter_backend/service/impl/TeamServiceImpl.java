@@ -1,24 +1,28 @@
 package com.xjzai1.usercenter_backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xjzai1.usercenter_backend.common.ErrorCode;
 import com.xjzai1.usercenter_backend.exception.BusinessException;
-import com.xjzai1.usercenter_backend.model.domain.enums.TeamStatusEnum;
-import com.xjzai1.usercenter_backend.pojo.Team;
-import com.xjzai1.usercenter_backend.pojo.User;
-import com.xjzai1.usercenter_backend.pojo.UserTeam;
+import com.xjzai1.usercenter_backend.model.dto.TeamQuery;
+import com.xjzai1.usercenter_backend.model.enums.TeamStatusEnum;
+import com.xjzai1.usercenter_backend.model.pojo.Team;
+import com.xjzai1.usercenter_backend.model.pojo.User;
+import com.xjzai1.usercenter_backend.model.pojo.UserTeam;
+import com.xjzai1.usercenter_backend.model.vo.TeamVo;
+import com.xjzai1.usercenter_backend.model.vo.UserVo;
 import com.xjzai1.usercenter_backend.service.TeamService;
 import com.xjzai1.usercenter_backend.mapper.TeamMapper;
 import com.xjzai1.usercenter_backend.service.UserService;
 import com.xjzai1.usercenter_backend.service.UserTeamService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 /**
 * @author Administrator
@@ -31,6 +35,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Autowired
     private TeamMapper teamMapper;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private UserTeamService userTeamService;
@@ -104,6 +111,82 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "创建队伍失败");
         }
         return userId;
+    }
+
+    @Override
+    public List<TeamVo> getTeamList(TeamQuery teamQuery, boolean isAdmin) {
+        QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
+        // 组合查询条件 如果为空，默认查找所有，所以不需要报错
+        if (teamQuery != null) {
+            Integer id = teamQuery.getId();
+            if (id != null && id > 0) {
+                queryWrapper.eq("id", id);
+            }
+            // todo 没搞懂，先注释了 因为上面是拿的鱼皮的vo,所以这里需要添加
+//            List<Long> idList = teamQuery.getIdList();
+//            if (CollectionUtils.isNotEmpty(idList)) {
+//                queryWrapper.in("id", idList);
+//            }
+            String searchText = teamQuery.getSearchText();
+            if (StringUtils.isNotBlank(searchText)) {
+                queryWrapper.and(qw -> qw.like("name", searchText).or().like("description", searchText));
+            }
+            String name = teamQuery.getName();
+            if (StringUtils.isNotBlank(name)) {
+                queryWrapper.like("name", name);
+            }
+            String description = teamQuery.getDescription();
+            if (StringUtils.isNotBlank(description)) {
+                queryWrapper.like("description", description);
+            }
+            Integer maxNum = teamQuery.getMaxNum();
+            // 查询最大人数相等的
+            if (maxNum != null && maxNum > 0) {
+                queryWrapper.eq("max_num", maxNum);
+            }
+            Integer userId = teamQuery.getUserId();
+            // 根据创建人来查询
+            if (userId != null && userId > 0) {
+                queryWrapper.eq("user_id", userId);
+            }
+            // 根据状态来查询
+            Integer status = teamQuery.getStatus();
+            TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
+            if (statusEnum == null) {
+                statusEnum = TeamStatusEnum.PUBLIC;
+            }
+            if (!isAdmin && statusEnum.equals(TeamStatusEnum.PRIVATE)) {
+                throw new BusinessException(ErrorCode.NO_AUTH);
+            }
+            queryWrapper.eq("status", statusEnum.getValue());
+        }
+        // 不展示已过期的队伍
+        // expireTime is null or expireTime > now()
+        queryWrapper.and(qw -> qw.gt("expire_time", new Date()).or().isNull("expire_time"));
+        List<Team> teamList = this.list(queryWrapper);
+        if (CollectionUtils.isEmpty(teamList)) {
+            return new ArrayList<>();
+        }
+
+        List<TeamVo> teamVoList = new ArrayList<>();
+        // 关联查询创建人的用户信息
+        for (Team team : teamList) {
+            Integer userId = team.getUserId();
+            if (userId == null) {
+                continue;
+            }
+            User user = userService.getById(userId);
+            TeamVo teamVo = new TeamVo();
+            BeanUtils.copyProperties(team, teamVo);
+            // 脱敏用户信息
+            if (user != null) {
+                UserVo userVO = new UserVo();
+                BeanUtils.copyProperties(user, userVO);
+                teamVo.setCreateUserVo(userVO);
+            }
+            teamVoList.add(teamVo);
+        }
+        return teamVoList;
     }
 }
 

@@ -1,4 +1,4 @@
-package com.xjzai1.usercenter_backend.pojo;
+package com.xjzai1.usercenter_backend.model.pojo;
 
 import com.baomidou.mybatisplus.annotation.*;
 
@@ -95,6 +95,6 @@ public class User implements Serializable {
      */
     private String tags;
 
-    @TableField(exist = false)
+    @TableField(exist = false) // 用来标明这个字段不在数据库中
     private static final long serialVersionUID = 1L;
 }

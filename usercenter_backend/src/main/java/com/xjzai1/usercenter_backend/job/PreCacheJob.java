@@ -2,7 +2,7 @@ package com.xjzai1.usercenter_backend.job;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xjzai1.usercenter_backend.pojo.User;
+import com.xjzai1.usercenter_backend.model.pojo.User;
 import com.xjzai1.usercenter_backend.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

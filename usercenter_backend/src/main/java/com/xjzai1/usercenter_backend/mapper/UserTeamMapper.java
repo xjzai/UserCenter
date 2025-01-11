@@ -1,6 +1,6 @@
 package com.xjzai1.usercenter_backend.mapper;
 
-import com.xjzai1.usercenter_backend.pojo.UserTeam;
+import com.xjzai1.usercenter_backend.model.pojo.UserTeam;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 

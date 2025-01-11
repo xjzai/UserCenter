@@ -1,6 +1,4 @@
-package com.xjzai1.usercenter_backend.model.domain.enums;
-
-import com.xjzai1.usercenter_backend.pojo.Team;
+package com.xjzai1.usercenter_backend.model.enums;
 
 public enum TeamStatusEnum {
 

@@ -1,4 +1,4 @@
-package com.xjzai1.usercenter_backend.pojo;
+package com.xjzai1.usercenter_backend.model.pojo;
 
 import com.baomidou.mybatisplus.annotation.*;
 
@@ -13,6 +13,8 @@ import lombok.Data;
 @TableName(value ="team")
 @Data
 public class Team implements Serializable {
+    @TableField(exist = false)
+    private static final long serialVersionUID = 7768280582358200076L;
     /**
      * id
      */
@@ -69,7 +71,5 @@ public class Team implements Serializable {
      */
     @TableLogic
     private Integer isDelete;
-
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    
 }

@@ -1,8 +1,7 @@
 package com.xjzai1.usercenter_backend.service;
 
-import com.xjzai1.usercenter_backend.pojo.User;
+import com.xjzai1.usercenter_backend.model.pojo.User;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.StopWatch;
 

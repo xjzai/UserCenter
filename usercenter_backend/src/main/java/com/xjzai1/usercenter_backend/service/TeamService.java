@@ -1,9 +1,12 @@
 package com.xjzai1.usercenter_backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xjzai1.usercenter_backend.common.BaseResponse;
-import com.xjzai1.usercenter_backend.pojo.Team;
-import com.xjzai1.usercenter_backend.pojo.User;
+import com.xjzai1.usercenter_backend.model.dto.TeamQuery;
+import com.xjzai1.usercenter_backend.model.pojo.Team;
+import com.xjzai1.usercenter_backend.model.pojo.User;
+import com.xjzai1.usercenter_backend.model.vo.TeamVo;
+
+import java.util.List;
 
 /**
 * @author Administrator
@@ -13,4 +16,6 @@ import com.xjzai1.usercenter_backend.pojo.User;
 public interface TeamService extends IService<Team> {
 
     Integer addTeam(Team team, User loginUser);
+
+    List<TeamVo> getTeamList(TeamQuery teamQuery, boolean isAdmin);
 }

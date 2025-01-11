@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.xjzai1.usercenter_backend.mapper.UserMapper">
 
-    <resultMap id="BaseResultMap" type="com.xjzai1.usercenter_backend.pojo.User">
+    <resultMap id="BaseResultMap" type="com.xjzai1.usercenter_backend.model.pojo.User">
             <id property="id" column="id" jdbcType="INTEGER"/>
             <result property="username" column="username" jdbcType="VARCHAR"/>
             <result property="userAccount" column="user_account" jdbcType="VARCHAR"/>

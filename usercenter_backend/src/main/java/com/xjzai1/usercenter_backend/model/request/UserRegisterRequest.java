@@ -1,4 +1,4 @@
-package com.xjzai1.usercenter_backend.model.domain.request;
+package com.xjzai1.usercenter_backend.model.request;
 
 import lombok.Data;
 

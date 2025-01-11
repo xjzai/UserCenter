@@ -1,4 +1,4 @@
-package com.xjzai1.usercenter_backend.model.domain.dto;
+package com.xjzai1.usercenter_backend.model.dto;
 
 import com.xjzai1.usercenter_backend.common.PageRequest;
 import lombok.Data;
@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class TeamQuery extends PageRequest {
+    private static final long serialVersionUID = 8374046899743061229L;
     /**
      * id
      */
@@ -20,6 +21,11 @@ public class TeamQuery extends PageRequest {
      * 描述
      */
     private String description;
+
+    /**
+     * 查找关键词（队伍名称或者描述）
+     */
+    private String searchText;
 
     /**
      * 最大人数

@@ -1,6 +1,6 @@
 package com.xjzai1.usercenter_backend.service;
 
-import com.xjzai1.usercenter_backend.pojo.User;
+import com.xjzai1.usercenter_backend.model.pojo.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

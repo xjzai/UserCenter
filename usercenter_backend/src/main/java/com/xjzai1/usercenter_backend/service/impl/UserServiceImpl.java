@@ -8,7 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import com.xjzai1.usercenter_backend.common.ErrorCode;
 import com.xjzai1.usercenter_backend.constant.userConstant;
 import com.xjzai1.usercenter_backend.exception.BusinessException;
-import com.xjzai1.usercenter_backend.pojo.User;
+import com.xjzai1.usercenter_backend.model.pojo.User;
 import com.xjzai1.usercenter_backend.service.UserService;
 import com.xjzai1.usercenter_backend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;

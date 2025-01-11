@@ -1,7 +1,7 @@
 package com.xjzai1.usercenter_backend.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xjzai1.usercenter_backend.pojo.UserTeam;
+import com.xjzai1.usercenter_backend.model.pojo.UserTeam;
 import com.xjzai1.usercenter_backend.service.UserTeamService;
 import com.xjzai1.usercenter_backend.mapper.UserTeamMapper;
 import org.springframework.stereotype.Service;

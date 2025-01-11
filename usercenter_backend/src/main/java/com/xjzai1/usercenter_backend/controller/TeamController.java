@@ -7,10 +7,11 @@ import com.xjzai1.usercenter_backend.common.BaseResponse;
 import com.xjzai1.usercenter_backend.common.ErrorCode;
 import com.xjzai1.usercenter_backend.common.ResultUtils;
 import com.xjzai1.usercenter_backend.exception.BusinessException;
-import com.xjzai1.usercenter_backend.model.domain.dto.TeamQuery;
-import com.xjzai1.usercenter_backend.model.domain.request.TeamAddRequest;
-import com.xjzai1.usercenter_backend.pojo.Team;
-import com.xjzai1.usercenter_backend.pojo.User;
+import com.xjzai1.usercenter_backend.model.dto.TeamQuery;
+import com.xjzai1.usercenter_backend.model.request.TeamAddRequest;
+import com.xjzai1.usercenter_backend.model.pojo.Team;
+import com.xjzai1.usercenter_backend.model.pojo.User;
+import com.xjzai1.usercenter_backend.model.vo.TeamVo;
 import com.xjzai1.usercenter_backend.service.TeamService;
 import com.xjzai1.usercenter_backend.service.UserService;
 import org.springframework.beans.BeanUtils;
@@ -82,14 +83,12 @@ public class TeamController {
     }
 
     @GetMapping("/get/list")
-    public BaseResponse<List<Team>> getTeamList(TeamQuery teamQuery) {
+    public BaseResponse<List<TeamVo>> getTeamList(TeamQuery teamQuery, HttpServletRequest request) {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Team team = new Team();
-        BeanUtils.copyProperties(teamQuery, team);
-        QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
-        List<Team> teamList = teamService.list(queryWrapper);
+        boolean isAdmin = userService.isAdmin(request);
+        List<TeamVo> teamList = teamService.getTeamList(teamQuery, isAdmin);
         return ResultUtils.success(teamList);
     }
 

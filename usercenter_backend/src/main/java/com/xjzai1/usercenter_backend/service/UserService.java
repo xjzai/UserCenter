@@ -1,7 +1,7 @@
 package com.xjzai1.usercenter_backend.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xjzai1.usercenter_backend.pojo.User;
+import com.xjzai1.usercenter_backend.model.pojo.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;

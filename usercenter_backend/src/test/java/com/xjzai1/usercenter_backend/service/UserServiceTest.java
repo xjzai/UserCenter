@@ -1,18 +1,12 @@
 package com.xjzai1.usercenter_backend.service;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
-import com.xjzai1.usercenter_backend.pojo.User;
+import com.xjzai1.usercenter_backend.model.pojo.User;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 
