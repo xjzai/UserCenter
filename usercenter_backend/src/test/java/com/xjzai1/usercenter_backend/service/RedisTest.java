@@ -36,7 +36,7 @@ public class RedisTest {
         xjzai1 = valueOperations.get("xjzai1Double");
         Assertions.assertTrue(2.0 == (Double) xjzai1);
         System.out.println(valueOperations.get("xjzai1User"));
-        valueOperations.set("xjzai1String", "xjzai1");
+//        valueOperations.set("xjzai1String", "xjzai1");
 
 
     }
