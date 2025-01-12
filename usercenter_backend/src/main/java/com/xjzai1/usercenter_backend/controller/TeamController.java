@@ -11,6 +11,7 @@ import com.xjzai1.usercenter_backend.model.dto.TeamQuery;
 import com.xjzai1.usercenter_backend.model.request.TeamAddRequest;
 import com.xjzai1.usercenter_backend.model.pojo.Team;
 import com.xjzai1.usercenter_backend.model.pojo.User;
+import com.xjzai1.usercenter_backend.model.request.TeamJoinRequest;
 import com.xjzai1.usercenter_backend.model.request.TeamUpdateRequest;
 import com.xjzai1.usercenter_backend.model.vo.TeamVo;
 import com.xjzai1.usercenter_backend.service.TeamService;
@@ -105,5 +106,19 @@ public class TeamController {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
         Page<Team> teamPage = teamService.page(page, queryWrapper);
         return ResultUtils.success(teamPage);
+    }
+
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest team, HttpServletRequest request) {
+        if (team == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        Boolean result = teamService.joinTeam(team, loginUser);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "队伍加入失败");
+        }
+        return ResultUtils.success(result);
+
     }
 }

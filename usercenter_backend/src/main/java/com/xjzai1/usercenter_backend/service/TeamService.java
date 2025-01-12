@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xjzai1.usercenter_backend.model.dto.TeamQuery;
 import com.xjzai1.usercenter_backend.model.pojo.Team;
 import com.xjzai1.usercenter_backend.model.pojo.User;
+import com.xjzai1.usercenter_backend.model.request.TeamJoinRequest;
 import com.xjzai1.usercenter_backend.model.request.TeamUpdateRequest;
 import com.xjzai1.usercenter_backend.model.vo.TeamVo;
 
@@ -21,4 +22,6 @@ public interface TeamService extends IService<Team> {
     List<TeamVo> getTeamList(TeamQuery teamQuery, boolean isAdmin);
 
     boolean updateTeam(TeamUpdateRequest team, User loginUser);
+
+    Boolean joinTeam(TeamJoinRequest team, User loginUser);
 }
