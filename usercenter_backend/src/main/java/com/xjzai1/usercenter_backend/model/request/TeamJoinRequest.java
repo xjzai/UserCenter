@@ -13,9 +13,9 @@ public class TeamJoinRequest implements Serializable {
     private static final long serialVersionUID = 7092261091668254877L;
 
     /**
-     * id
+     * teamid
      */
-    private Integer id;
+    private Integer teamId;
 
 
     /**

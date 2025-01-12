@@ -12,6 +12,7 @@ import com.xjzai1.usercenter_backend.model.request.TeamAddRequest;
 import com.xjzai1.usercenter_backend.model.pojo.Team;
 import com.xjzai1.usercenter_backend.model.pojo.User;
 import com.xjzai1.usercenter_backend.model.request.TeamJoinRequest;
+import com.xjzai1.usercenter_backend.model.request.TeamQuitRequest;
 import com.xjzai1.usercenter_backend.model.request.TeamUpdateRequest;
 import com.xjzai1.usercenter_backend.model.vo.TeamVo;
 import com.xjzai1.usercenter_backend.service.TeamService;
@@ -119,6 +120,18 @@ public class TeamController {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "队伍加入失败");
         }
         return ResultUtils.success(result);
+    }
 
+    @PostMapping("/quit")
+    public BaseResponse<Boolean> quitTeam(@RequestBody TeamQuitRequest team, HttpServletRequest request) {
+        if (team == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean result = teamService.quitTeam(team, loginUser);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        return ResultUtils.success(result);
     }
 }

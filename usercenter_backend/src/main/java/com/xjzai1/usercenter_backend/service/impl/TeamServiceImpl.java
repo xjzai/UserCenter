@@ -11,6 +11,7 @@ import com.xjzai1.usercenter_backend.model.pojo.Team;
 import com.xjzai1.usercenter_backend.model.pojo.User;
 import com.xjzai1.usercenter_backend.model.pojo.UserTeam;
 import com.xjzai1.usercenter_backend.model.request.TeamJoinRequest;
+import com.xjzai1.usercenter_backend.model.request.TeamQuitRequest;
 import com.xjzai1.usercenter_backend.model.request.TeamUpdateRequest;
 import com.xjzai1.usercenter_backend.model.vo.TeamVo;
 import com.xjzai1.usercenter_backend.model.vo.UserVo;
@@ -45,8 +46,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     @Autowired
     private UserTeamService userTeamService;
 
-    @Transactional(rollbackFor = Exception.class)
+
+
     @Override
+    // 对数据库有多个增删改操作时一定要添加，防止执行了第一个操作之后程序挂掉，导致数据库混乱
+    @Transactional(rollbackFor = Exception.class)
     public Integer addTeam(Team team, User loginUser) {
 //1. 请求参数是否为空？ 2. 是否登录，未登录不允许创建
         if (team == null || loginUser == null) {
@@ -228,6 +232,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
 
 
+    // todo 添加锁，防止同一时间多次加入队伍，后续优化
     @Override
     public Boolean joinTeam(TeamJoinRequest team, User loginUser) {
         // 其他人、未满、未过期，允许加入多个队伍，但是要有个上限 P0
@@ -240,7 +245,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if (team == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Integer teamId = team.getId();
+        Integer teamId = team.getTeamId();
         if (teamId == null || teamId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -293,6 +298,67 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         userTeam.setJoinTime(new Date());
         return userTeamService.save(userTeam);
 
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean quitTeam(TeamQuitRequest team, User loginUser) {
+        //1.  校验请求参数
+        if (team == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Integer teamId = team.getTeamId();
+        if (teamId == null || teamId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //2.  校验队伍是否存在
+        Team quitTeam = this.getById(teamId);
+        if (quitTeam == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        //3.  校验我是否已加入队伍
+        Integer userId = loginUser.getId();
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        userTeamQueryWrapper.eq("team_id",teamId);
+        long hasTeamJoinNum = userTeamService.count(userTeamQueryWrapper);
+        userTeamQueryWrapper.eq("user_id",userId);
+        long hasQuitTeam = userTeamService.count(userTeamQueryWrapper);
+        if (hasQuitTeam <= 0){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户未加入该队伍");
+        }
+        //4.  如果队伍
+        //  a.  只剩一人，队伍解散
+        if (hasTeamJoinNum == 1) {
+            // 解散队伍
+            this.removeById(teamId);
+        } else {
+            //  b.  还有其他人
+            //    ⅰ.  如果是队长退出队伍，权限转移给第二早加入的用户 —— 先来后到
+            //只用取 id 最小的 2 条数据
+            // todo 之后改成可以指定转给谁
+            if (userId.equals(quitTeam.getUserId())) {
+                QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("team_id", teamId);
+                queryWrapper.last("order by id asc limit 2");
+                List<UserTeam> userTeamList = userTeamService.list(queryWrapper);
+                if (CollectionUtils.isEmpty(userTeamList) || userTeamList.size() <= 1) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+                }
+                UserTeam nextUserTeam = userTeamList.get(1);
+                Integer nextTeamLeaderId = nextUserTeam.getUserId();
+                // 更新当前队伍的队长
+                Team updateTeam = new Team();
+                updateTeam.setId(teamId);
+                updateTeam.setUserId(nextTeamLeaderId);
+                boolean result = this.updateById(updateTeam);
+                if (!result) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新队伍队长失败");
+                }
+            }
+
+        }
+        return userTeamService.remove(userTeamQueryWrapper);
     }
 }
 

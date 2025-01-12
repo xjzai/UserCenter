@@ -10,7 +10,7 @@ import lombok.Data;
 public class TeamQuitRequest {
 
     /**
-     * id
+     * teamid
      */
-    private Integer id;
+    private Integer teamId;
 }
