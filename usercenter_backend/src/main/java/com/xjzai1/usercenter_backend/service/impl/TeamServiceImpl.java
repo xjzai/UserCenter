@@ -10,6 +10,7 @@ import com.xjzai1.usercenter_backend.model.enums.TeamStatusEnum;
 import com.xjzai1.usercenter_backend.model.pojo.Team;
 import com.xjzai1.usercenter_backend.model.pojo.User;
 import com.xjzai1.usercenter_backend.model.pojo.UserTeam;
+import com.xjzai1.usercenter_backend.model.request.TeamUpdateRequest;
 import com.xjzai1.usercenter_backend.model.vo.TeamVo;
 import com.xjzai1.usercenter_backend.model.vo.UserVo;
 import com.xjzai1.usercenter_backend.service.TeamService;
@@ -187,6 +188,40 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             teamVoList.add(teamVo);
         }
         return teamVoList;
+    }
+
+    @Override
+    public boolean updateTeam(TeamUpdateRequest team, User loginUser) {
+        // 判断请求参数是否为空
+        if (team == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Integer userId = loginUser.getId();
+        if (userId <= 0 || userId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 查询队伍是否存在
+        Team oldTeam = this.getById(team.getId());
+        if (oldTeam == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        // 只有管理员或者队伍的创建者可以修改
+        if (!userId.equals(oldTeam.getUserId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+
+        // todo 如果用户传入的新值和老值一致，就不用 update 了（可自行实现，降低数据库使用次数）
+        // 如果队伍状态改为加密，必须要有密码
+        TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(team.getStatus());
+        if (TeamStatusEnum.SECRET.equals(statusEnum)) {
+            if (StringUtils.isBlank(team.getPassword())) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "加密房间必须要设置密码");
+            }
+        }
+        // 更新成功
+        Team updateTeam = new Team();
+        BeanUtils.copyProperties(team, updateTeam);
+        return this.updateById(updateTeam);
     }
 }
 
