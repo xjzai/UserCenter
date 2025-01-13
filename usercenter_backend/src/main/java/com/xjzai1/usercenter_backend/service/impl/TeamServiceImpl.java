@@ -10,6 +10,7 @@ import com.xjzai1.usercenter_backend.model.enums.TeamStatusEnum;
 import com.xjzai1.usercenter_backend.model.pojo.Team;
 import com.xjzai1.usercenter_backend.model.pojo.User;
 import com.xjzai1.usercenter_backend.model.pojo.UserTeam;
+import com.xjzai1.usercenter_backend.model.request.TeamDeleteRequest;
 import com.xjzai1.usercenter_backend.model.request.TeamJoinRequest;
 import com.xjzai1.usercenter_backend.model.request.TeamQuitRequest;
 import com.xjzai1.usercenter_backend.model.request.TeamUpdateRequest;
@@ -89,6 +90,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         //  f. 超时时间 > 当前时间
         Date expireTime = team.getExpireTime();
+        // todo 用户没填时间就永不过期，以后做
         if (new Date().after(expireTime)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "超时时间 > 当前时间");
         }
@@ -359,6 +361,37 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
         }
         return userTeamService.remove(userTeamQueryWrapper);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteTeam(TeamDeleteRequest team, User loginUser) {
+        //1.  校验请求参数
+        if (team == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Integer teamId = team.getTeamId();
+        if (teamId == null || teamId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //2.  校验队伍是否存在
+        Team deleteTeam = this.getById(teamId);
+        if (deleteTeam == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        // 校验你是不是队伍的队长，或者是管理员
+        if (!deleteTeam.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "无访问权限");
+        }
+        // 移除所有加入队伍的关联信息
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        userTeamQueryWrapper.eq("team_id", teamId);
+        boolean result = userTeamService.remove(userTeamQueryWrapper);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除队伍关联信息失败");
+        }
+        // 删除队伍
+        return this.removeById(teamId);
     }
 }
 

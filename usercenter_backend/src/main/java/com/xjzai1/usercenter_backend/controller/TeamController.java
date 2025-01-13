@@ -3,17 +3,15 @@ package com.xjzai1.usercenter_backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.xjzai1.usercenter_backend.common.BaseResponse;
 import com.xjzai1.usercenter_backend.common.ErrorCode;
 import com.xjzai1.usercenter_backend.common.ResultUtils;
 import com.xjzai1.usercenter_backend.exception.BusinessException;
 import com.xjzai1.usercenter_backend.model.dto.TeamQuery;
-import com.xjzai1.usercenter_backend.model.request.TeamAddRequest;
+import com.xjzai1.usercenter_backend.model.request.*;
 import com.xjzai1.usercenter_backend.model.pojo.Team;
 import com.xjzai1.usercenter_backend.model.pojo.User;
-import com.xjzai1.usercenter_backend.model.request.TeamJoinRequest;
-import com.xjzai1.usercenter_backend.model.request.TeamQuitRequest;
-import com.xjzai1.usercenter_backend.model.request.TeamUpdateRequest;
 import com.xjzai1.usercenter_backend.model.vo.TeamVo;
 import com.xjzai1.usercenter_backend.service.TeamService;
 import com.xjzai1.usercenter_backend.service.UserService;
@@ -35,6 +33,12 @@ public class TeamController {
     @Autowired
     private UserService userService;
 
+    /**
+     * 添加队伍信息
+     * @param teamAddRequest
+     * @param request
+     * @return
+     */
     @PostMapping("/add")
     public BaseResponse<Integer> addTeam(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest request) {
         if (teamAddRequest == null) {
@@ -48,19 +52,12 @@ public class TeamController {
         return ResultUtils.success(teamId);
     }
 
-    // todo 还没有实现把连接表的内容一起删掉呢
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(int teamId) {
-        if (teamId <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        boolean result = teamService.removeById(teamId);
-        if (!result) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-        }
-        return ResultUtils.success(result);
-    }
-
+    /**
+     * 更新队伍信息
+     * @param team
+     * @param request
+     * @return
+     */
     @PostMapping("/update")
     public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest team, HttpServletRequest request) {
         if (team == null) {
@@ -74,6 +71,11 @@ public class TeamController {
         return ResultUtils.success(result);
     }
 
+    /**
+     * 根据id获取队伍信息
+     * @param id
+     * @return
+     */
     @GetMapping("/get")
     public BaseResponse<Team> getTeam(int id) {
         if (id <= 0) {
@@ -86,6 +88,12 @@ public class TeamController {
         return ResultUtils.success(team);
     }
 
+    /**
+     * 查询队伍列表
+     * @param teamQuery
+     * @param request
+     * @return
+     */
     @GetMapping("/get/list")
     public BaseResponse<List<TeamVo>> getTeamList(TeamQuery teamQuery, HttpServletRequest request) {
         if (teamQuery == null) {
@@ -96,6 +104,11 @@ public class TeamController {
         return ResultUtils.success(teamList);
     }
 
+    /**
+     * 查询分页队伍列表
+     * @param teamQuery
+     * @return
+     */
     @GetMapping("/get/page")
     public BaseResponse<Page<Team>> getTeamPage(TeamQuery teamQuery) {
         if (teamQuery == null) {
@@ -109,6 +122,12 @@ public class TeamController {
         return ResultUtils.success(teamPage);
     }
 
+    /**
+     * 加入队伍
+     * @param team
+     * @param request
+     * @return
+     */
     @PostMapping("/join")
     public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest team, HttpServletRequest request) {
         if (team == null) {
@@ -122,6 +141,12 @@ public class TeamController {
         return ResultUtils.success(result);
     }
 
+    /**
+     * 退出队伍
+     * @param team
+     * @param request
+     * @return
+     */
     @PostMapping("/quit")
     public BaseResponse<Boolean> quitTeam(@RequestBody TeamQuitRequest team, HttpServletRequest request) {
         if (team == null) {
@@ -129,6 +154,25 @@ public class TeamController {
         }
         User loginUser = userService.getLoginUser(request);
         boolean result = teamService.quitTeam(team, loginUser);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 删除队伍/解散队伍
+     * @param team
+     * @param request
+     * @return
+     */
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteTeam(@RequestBody TeamDeleteRequest team, HttpServletRequest request) {
+        if (team == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean result = teamService.deleteTeam(team, loginUser);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
