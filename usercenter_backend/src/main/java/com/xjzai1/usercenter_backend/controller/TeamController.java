@@ -9,22 +9,27 @@ import com.xjzai1.usercenter_backend.common.ErrorCode;
 import com.xjzai1.usercenter_backend.common.ResultUtils;
 import com.xjzai1.usercenter_backend.exception.BusinessException;
 import com.xjzai1.usercenter_backend.model.dto.TeamQuery;
+import com.xjzai1.usercenter_backend.model.pojo.UserTeam;
 import com.xjzai1.usercenter_backend.model.request.*;
 import com.xjzai1.usercenter_backend.model.pojo.Team;
 import com.xjzai1.usercenter_backend.model.pojo.User;
 import com.xjzai1.usercenter_backend.model.vo.TeamVo;
 import com.xjzai1.usercenter_backend.service.TeamService;
 import com.xjzai1.usercenter_backend.service.UserService;
+import com.xjzai1.usercenter_backend.service.UserTeamService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/team")
-@CrossOrigin(origins = {"http://localhost:3000/"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/"}, allowCredentials = "true")
 public class TeamController {
 
     @Autowired
@@ -33,8 +38,12 @@ public class TeamController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserTeamService userTeamService;
+
     /**
      * 添加队伍信息
+     *
      * @param teamAddRequest
      * @param request
      * @return
@@ -54,6 +63,7 @@ public class TeamController {
 
     /**
      * 更新队伍信息
+     *
      * @param team
      * @param request
      * @return
@@ -73,6 +83,7 @@ public class TeamController {
 
     /**
      * 根据id获取队伍信息
+     *
      * @param id
      * @return
      */
@@ -90,6 +101,7 @@ public class TeamController {
 
     /**
      * 查询队伍列表
+     *
      * @param teamQuery
      * @param request
      * @return
@@ -106,6 +118,7 @@ public class TeamController {
 
     /**
      * 查询分页队伍列表
+     *
      * @param teamQuery
      * @return
      */
@@ -124,6 +137,7 @@ public class TeamController {
 
     /**
      * 加入队伍
+     *
      * @param team
      * @param request
      * @return
@@ -143,6 +157,7 @@ public class TeamController {
 
     /**
      * 退出队伍
+     *
      * @param team
      * @param request
      * @return
@@ -162,6 +177,7 @@ public class TeamController {
 
     /**
      * 删除队伍/解散队伍
+     *
      * @param team
      * @param request
      * @return
@@ -177,5 +193,36 @@ public class TeamController {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
         return ResultUtils.success(result);
+    }
+
+    @GetMapping("/get/list/my/create")
+    public BaseResponse<List<TeamVo>> getMyCreateTeamList(TeamQuery teamQuery, HttpServletRequest request) {
+        if (teamQuery == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean isAdmin = userService.isAdmin(request);
+        teamQuery.setUserId(loginUser.getId());
+        List<TeamVo> teamList = teamService.getTeamList(teamQuery, isAdmin);
+        return ResultUtils.success(teamList);
+    }
+
+    @GetMapping("/get/list/my/join")
+    public BaseResponse<List<TeamVo>> getMyJoinTeamList(TeamQuery teamQuery, HttpServletRequest request) {
+        if (teamQuery == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", loginUser.getId());
+        List<UserTeam> userTeamList = userTeamService.list(queryWrapper);
+        // 防止脏数据，出现重复的teamid，虽然一般不可能出现。
+        // todo 这两行不太懂，后续查一下
+        Map<Integer, List<UserTeam>> listMap = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+        ArrayList<Integer> idList = new ArrayList<>(listMap.keySet());
+        teamQuery.setIdList(idList);
+        List<TeamVo> teamList = teamService.getTeamList(teamQuery,true);
+        return ResultUtils.success(teamList);
+
     }
 }

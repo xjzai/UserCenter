@@ -136,6 +136,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 //            if (CollectionUtils.isNotEmpty(idList)) {
 //                queryWrapper.in("id", idList);
 //            }
+            List<Integer> idList = teamQuery.getIdList();
+            if (CollectionUtils.isNotEmpty(idList)) {
+                queryWrapper.in("id", idList);
+            }
             String searchText = teamQuery.getSearchText();
             if (StringUtils.isNotBlank(searchText)) {
                 queryWrapper.and(qw -> qw.like("name", searchText).or().like("description", searchText));
@@ -159,6 +163,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                 queryWrapper.eq("user_id", userId);
             }
             // 根据状态来查询
+            // todo 什么都没传不应该默认是0， 应该能看所有队伍
             Integer status = teamQuery.getStatus();
             TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
             if (statusEnum == null) {
