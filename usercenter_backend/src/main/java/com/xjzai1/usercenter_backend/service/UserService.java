@@ -56,6 +56,8 @@ public interface UserService extends IService<User> {
 
     // 辅助函数
 
+    List<User> matchUsers(long num, User loginUser);
+
     /**
      * 脱敏成安全的信息用于返回
      * @param originUser

@@ -17,6 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+// todo 这里定时任务记得设置过期时间，同时还有reccomend方法也没搞过期时间
+
 @Component
 @Slf4j
 public class PreCacheJob {
