@@ -60,6 +60,11 @@ public class TeamVo implements Serializable {
      */
     UserVo createUserVo;
 
+    /**
+     * 是否已经加入队伍
+     */
+    private boolean hasJoin = false;
+
     // todo 入队用户信息 待实现
 
 }
