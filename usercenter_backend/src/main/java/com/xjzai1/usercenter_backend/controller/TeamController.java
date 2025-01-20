@@ -119,8 +119,8 @@ public class TeamController {
         QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
         try {
             User loginUser = userService.getLoginUser(request);
-            userTeamQueryWrapper.eq("userId", loginUser.getId());
-            userTeamQueryWrapper.in("teamId", teamIdList);
+            userTeamQueryWrapper.eq("user_id", loginUser.getId());
+            userTeamQueryWrapper.in("team_id", teamIdList);
             List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
             // 已加入的队伍 id 集合
             Set<Integer> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
@@ -223,6 +223,7 @@ public class TeamController {
         return ResultUtils.success(teamList);
     }
 
+    // todo 我加入的队伍，我创建的队伍 记得返回一个hasjoin值
     @GetMapping("/get/list/my/join")
     public BaseResponse<List<TeamVo>> getMyJoinTeamList(TeamQuery teamQuery, HttpServletRequest request) {
         if (teamQuery == null) {
