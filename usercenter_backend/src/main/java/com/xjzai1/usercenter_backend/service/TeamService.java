@@ -21,7 +21,9 @@ public interface TeamService extends IService<Team> {
 
     Integer addTeam(Team team, User loginUser);
 
-    List<TeamVo> getTeamList(TeamQuery teamQuery, boolean isAdmin);
+//    List<TeamVo> getTeamList(TeamQuery teamQuery, boolean isAdmin);
+
+    List<TeamVo> getTeamList(TeamQuery teamQuery, User loginUser);
 
     boolean updateTeam(TeamUpdateRequest team, User loginUser);
 

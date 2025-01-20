@@ -21,13 +21,13 @@ import com.xjzai1.usercenter_backend.mapper.TeamMapper;
 import com.xjzai1.usercenter_backend.service.UserService;
 import com.xjzai1.usercenter_backend.service.UserTeamService;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.builder.BuilderException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
 * @author Administrator
@@ -90,8 +90,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         //  f. 超时时间 > 当前时间
         Date expireTime = team.getExpireTime();
-        // todo 用户没填时间就永不过期，以后做
-        if (new Date().after(expireTime)) {
+        // 完成 todo 用户没填时间就永不过期，以后做
+        // todo 过期的队伍前端看不到，推出不了，占位置不能创建新的 思路：前端能看所有队伍，过期队伍可以红色显示或者灰色
+        if (expireTime != null && new Date().after(expireTime)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "超时时间 > 当前时间");
         }
         //  g. 校验用户最多创建 5 个队伍
@@ -123,7 +124,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamVo> getTeamList(TeamQuery teamQuery, boolean isAdmin) {
+    public List<TeamVo> getTeamList(TeamQuery teamQuery, User loginUser) {
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean isAdmin = userService.isAdmin(loginUser);
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         // 组合查询条件 如果为空，默认查找所有，所以不需要报错
         if (teamQuery != null) {
@@ -131,11 +136,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if (id != null && id > 0) {
                 queryWrapper.eq("id", id);
             }
-            // todo 没搞懂，先注释了 因为上面是拿的鱼皮的vo,所以这里需要添加
-//            List<Long> idList = teamQuery.getIdList();
-//            if (CollectionUtils.isNotEmpty(idList)) {
-//                queryWrapper.in("id", idList);
-//            }
             List<Integer> idList = teamQuery.getIdList();
             if (CollectionUtils.isNotEmpty(idList)) {
                 queryWrapper.in("id", idList);
@@ -163,24 +163,31 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                 queryWrapper.eq("user_id", userId);
             }
             // 根据状态来查询
-            // todo 什么都没传不应该默认是0， 应该能看所有队伍
+            // todo 什么都没传不应该默认是0， 应该能看所有队伍 完成
             Integer status = teamQuery.getStatus();
             TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
-            if (statusEnum == null) {
-                statusEnum = TeamStatusEnum.PUBLIC;
-            }
-            if (!isAdmin && statusEnum.equals(TeamStatusEnum.PRIVATE)) {
+            if (!isAdmin && statusEnum != null && statusEnum.equals(TeamStatusEnum.PRIVATE)) {
                 throw new BusinessException(ErrorCode.NO_AUTH);
             }
-            queryWrapper.eq("status", statusEnum.getValue());
+            if (statusEnum == null) {
+                ArrayList<Integer> allStatus = new ArrayList<>();
+                allStatus.add(0);
+                allStatus.add(1);
+                allStatus.add(2);
+                queryWrapper.in("status", allStatus);
+            } else {
+                queryWrapper.eq("status", statusEnum.getValue());
+            }
+
         }
-        // 不展示已过期的队伍
+        // 不展示已过期的队伍 值为null代表永不过期
         // expireTime is null or expireTime > now()
         queryWrapper.and(qw -> qw.gt("expire_time", new Date()).or().isNull("expire_time"));
         List<Team> teamList = this.list(queryWrapper);
         if (CollectionUtils.isEmpty(teamList)) {
             return new ArrayList<>();
         }
+
 
         List<TeamVo> teamVoList = new ArrayList<>();
         // 关联查询创建人的用户信息
@@ -200,6 +207,28 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             }
             teamVoList.add(teamVo);
         }
+
+        final List<Integer> teamIdList = teamVoList.stream().map(TeamVo::getId).collect(Collectors.toList());
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        try {
+            // 3、查询已加入队伍的人数
+            userTeamQueryWrapper.in("team_id", teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            // 队伍 id => 加入这个队伍的用户列表
+            Map<Integer, List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+            teamVoList.forEach(team -> team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(), new ArrayList<>()).size()));
+
+            // 2、判断当前用户是否已加入队伍
+            userTeamQueryWrapper.eq("user_id", loginUser.getId());
+
+            List<UserTeam> newUserTeamList = userTeamService.list(userTeamQueryWrapper);
+            // 已加入的队伍 id 集合
+            Set<Integer> hasJoinTeamIdSet = newUserTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+            teamVoList.forEach(team -> {
+                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });
+        } catch (Exception ignored) {}
         return teamVoList;
     }
 

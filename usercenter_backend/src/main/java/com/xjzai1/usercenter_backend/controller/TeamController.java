@@ -19,6 +19,7 @@ import com.xjzai1.usercenter_backend.service.UserService;
 import com.xjzai1.usercenter_backend.service.UserTeamService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -112,23 +113,35 @@ public class TeamController {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean isAdmin = userService.isAdmin(request);
-        List<TeamVo> teamList = teamService.getTeamList(teamQuery, isAdmin);
-        final List<Integer> teamIdList = teamList.stream().map(TeamVo::getId).collect(Collectors.toList());
-        // 2、判断当前用户是否已加入队伍
-        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-        try {
-            User loginUser = userService.getLoginUser(request);
-            userTeamQueryWrapper.eq("user_id", loginUser.getId());
-            userTeamQueryWrapper.in("team_id", teamIdList);
-            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
-            // 已加入的队伍 id 集合
-            Set<Integer> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
-            teamList.forEach(team -> {
-                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
-                team.setHasJoin(hasJoin);
-            });
-        } catch (Exception e) {}
+        User loginUser = userService.getLoginUser(request);
+        List<TeamVo> teamList = teamService.getTeamList(teamQuery, loginUser);
+//        final List<Integer> teamIdList = teamList.stream().map(TeamVo::getId).collect(Collectors.toList());
+//        if (CollectionUtils.isEmpty(teamIdList)) {
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "未找到相关队伍");
+//        }
+//
+//        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+//        try {
+//            // 3、查询已加入队伍的人数
+////            QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
+//            userTeamQueryWrapper.in("team_id", teamIdList);
+//            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+//            // 队伍 id => 加入这个队伍的用户列表
+//            Map<Integer, List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+//            teamList.forEach(team -> team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(), new ArrayList<>()).size()));
+//
+//            // 2、判断当前用户是否已加入队伍
+//            User loginUser = userService.getLoginUser(request);
+//            userTeamQueryWrapper.eq("user_id", loginUser.getId());
+//
+//            List<UserTeam> newUserTeamList = userTeamService.list(userTeamQueryWrapper);
+//            // 已加入的队伍 id 集合
+//            Set<Integer> hasJoinTeamIdSet = newUserTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+//            teamList.forEach(team -> {
+//                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
+//                team.setHasJoin(hasJoin);
+//            });
+//        } catch (Exception ignored) {}
         return ResultUtils.success(teamList);
     }
 
@@ -217,9 +230,9 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-        boolean isAdmin = userService.isAdmin(request);
+//        boolean isAdmin = userService.isAdmin(request);
         teamQuery.setUserId(loginUser.getId());
-        List<TeamVo> teamList = teamService.getTeamList(teamQuery, isAdmin);
+        List<TeamVo> teamList = teamService.getTeamList(teamQuery, loginUser);
         return ResultUtils.success(teamList);
     }
 
@@ -238,7 +251,7 @@ public class TeamController {
         Map<Integer, List<UserTeam>> listMap = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
         ArrayList<Integer> idList = new ArrayList<>(listMap.keySet());
         teamQuery.setIdList(idList);
-        List<TeamVo> teamList = teamService.getTeamList(teamQuery,true);
+        List<TeamVo> teamList = teamService.getTeamList(teamQuery,loginUser);
         return ResultUtils.success(teamList);
 
     }
