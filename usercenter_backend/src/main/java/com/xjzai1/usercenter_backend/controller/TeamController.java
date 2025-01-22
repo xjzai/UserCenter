@@ -236,7 +236,6 @@ public class TeamController {
         return ResultUtils.success(teamList);
     }
 
-    // todo 我加入的队伍，我创建的队伍 记得返回一个hasjoin值
     @GetMapping("/get/list/my/join")
     public BaseResponse<List<TeamVo>> getMyJoinTeamList(TeamQuery teamQuery, HttpServletRequest request) {
         if (teamQuery == null) {

@@ -75,7 +75,6 @@ public class TeamVo implements Serializable {
      */
     private boolean admin = false;
 
-    // todo 入队用户信息 待实现
     /**
      * 入队用户信息
      */

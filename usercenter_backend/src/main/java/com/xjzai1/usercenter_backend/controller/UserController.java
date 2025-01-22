@@ -132,7 +132,7 @@ public class UserController implements userConstant {
         return ResultUtils.success(userService.updateUser(user, loginUser));
     }
 
-    // Todo 好像把密码都返回了，以后看看能不能优化了，返回安全的page
+    // Todo !!! 好像把密码都返回了，以后看看能不能优化了，返回安全的page
     // 使用page需要自己加上配置类MybatisPlusConfig
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {

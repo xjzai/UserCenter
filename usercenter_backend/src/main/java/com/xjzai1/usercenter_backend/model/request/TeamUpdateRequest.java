@@ -36,10 +36,9 @@ public class TeamUpdateRequest implements Serializable {
     private Date expireTime;
 
     /**
-     * 用户id
+     * 队长用户id
      */
-    // todo 先不加了，如果以后实现转让队长可以加
-    // private Integer userId;
+     private Integer userId;
 
     /**
      * 0 - 公开，1 - 私有，2 - 加密

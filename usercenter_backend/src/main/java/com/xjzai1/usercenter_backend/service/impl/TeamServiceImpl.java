@@ -80,7 +80,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "队伍状态不满足要求");
         }
         //  e. 如果 status 是加密状态，一定要有密码，且密码 <= 32
-        // todo 不管是不是加密状态都会存入密码
+        // todo !!! 不管是不是加密状态都会存入密码
         String password = team.getPassword();
         if (TeamStatusEnum.SECRET.equals(statusEnum)) {
             if (StringUtils.isBlank(password) || password.length() > 32) {
@@ -89,8 +89,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         //  f. 超时时间 > 当前时间
         Date expireTime = team.getExpireTime();
-        // 完成 todo 用户没填时间就永不过期，以后做
-        // todo 过期的队伍前端看不到，推出不了，占位置不能创建新的 思路：前端能看所有队伍，过期队伍可以红色显示或者灰色
+        // 用户没填时间就永不过期，以后做
+        // todo !!! 过期的队伍前端看不到，推出不了，占位置不能创建新的 思路：前端能看所有队伍，过期队伍可以红色显示或者灰色
         if (expireTime != null && new Date().after(expireTime)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "超时时间 > 当前时间");
         }
@@ -162,7 +162,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                 queryWrapper.eq("user_id", userId);
             }
             // 根据状态来查询
-            // todo 什么都没传不应该默认是0， 应该能看所有队伍 完成
+            // 什么都没传不应该默认是0， 应该能看所有队伍
             Integer status = teamQuery.getStatus();
             TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(status);
             if (!isAdmin && statusEnum != null && statusEnum.equals(TeamStatusEnum.PRIVATE)) {
@@ -294,7 +294,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
 
-    // todo 添加锁，防止同一时间多次加入队伍，后续优化
+    // todo !!! 添加锁，防止同一时间多次加入队伍，后续优化
     @Override
     public Boolean joinTeam(TeamJoinRequest team, User loginUser) {
         // 其他人、未满、未过期，允许加入多个队伍，但是要有个上限 P0
@@ -398,7 +398,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             //  b.  还有其他人
             //    ⅰ.  如果是队长退出队伍，权限转移给第二早加入的用户 —— 先来后到
             //只用取 id 最小的 2 条数据
-            // todo 之后改成可以指定转给谁
             if (userId.equals(quitTeam.getUserId())) {
                 QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("team_id", teamId);
