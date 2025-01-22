@@ -70,6 +70,15 @@ public class TeamVo implements Serializable {
      */
     private boolean hasJoin = false;
 
+    /**
+     * 是否是管理员 不知道为什么不能使用isAdmin字段，使用后用不了Lombok
+     */
+    private boolean admin = false;
+
     // todo 入队用户信息 待实现
+    /**
+     * 入队用户信息
+     */
+    private List<UserVo> userList;
 
 }
